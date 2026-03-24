@@ -308,9 +308,17 @@ func prepareAdd(ctx context.Context, path string, cfg Config) (*addWorktreeConte
 
 // copyAfterAdd copies files from the current worktree to the newly created worktree.
 // It is a no-op when running from a bare root (no working tree to copy from).
-func copyAfterAdd(ctx context.Context, ac *addWorktreeContext, dstPath string, copyOpts CopyOptions) error {
+func copyAfterAdd(ctx context.Context, ac *addWorktreeContext, dstPath string, cfg Config) error {
 	if ac.isBareRoot {
 		return nil
+	}
+
+	copyOpts := CopyOptions{
+		CopyIgnored:   cfg.CopyIgnored,
+		CopyUntracked: cfg.CopyUntracked,
+		CopyModified:  cfg.CopyModified,
+		NoCopy:        cfg.NoCopy,
+		Copy:          cfg.Copy,
 	}
 
 	// Exclude basedir from copy to prevent circular copying, but only when
@@ -333,7 +341,7 @@ func copyAfterAdd(ctx context.Context, ac *addWorktreeContext, dstPath string, c
 }
 
 // AddWorktree creates a new worktree for the given branch.
-func AddWorktree(ctx context.Context, path, branch string, copyOpts CopyOptions, cfg Config) error {
+func AddWorktree(ctx context.Context, path, branch string, cfg Config) error {
 	ac, err := prepareAdd(ctx, path, cfg)
 	if err != nil {
 		return err
@@ -349,12 +357,12 @@ func AddWorktree(ctx context.Context, path, branch string, copyOpts CopyOptions,
 		return err
 	}
 
-	return copyAfterAdd(ctx, ac, path, copyOpts)
+	return copyAfterAdd(ctx, ac, path, cfg)
 }
 
 // AddWorktreeWithNewBranch creates a new worktree with a new branch.
 // If startPoint is specified, the new branch will be created from that commit/branch.
-func AddWorktreeWithNewBranch(ctx context.Context, path, branch, startPoint string, copyOpts CopyOptions, cfg Config) error {
+func AddWorktreeWithNewBranch(ctx context.Context, path, branch, startPoint string, cfg Config) error {
 	ac, err := prepareAdd(ctx, path, cfg)
 	if err != nil {
 		return err
@@ -375,7 +383,7 @@ func AddWorktreeWithNewBranch(ctx context.Context, path, branch, startPoint stri
 		return err
 	}
 
-	return copyAfterAdd(ctx, ac, path, copyOpts)
+	return copyAfterAdd(ctx, ac, path, cfg)
 }
 
 // initBaseDir initializes the basedir with .gitignore and README.md files.

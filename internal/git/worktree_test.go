@@ -277,7 +277,7 @@ func TestAddWorktree(t *testing.T) {
 	defer restore()
 
 	wtPath := filepath.Join(repo.ParentDir(), "worktree-existing")
-	err := AddWorktree(t.Context(), wtPath, "existing-branch", CopyOptions{}, Config{})
+	err := AddWorktree(t.Context(), wtPath, "existing-branch", Config{})
 	if err != nil {
 		t.Fatalf("AddWorktree failed: %v", err)
 	}
@@ -315,7 +315,7 @@ func TestAddWorktreeWithNewBranch(t *testing.T) {
 	defer restore()
 
 	wtPath := filepath.Join(repo.ParentDir(), "worktree-new")
-	err := AddWorktreeWithNewBranch(t.Context(), wtPath, "new-branch", "", CopyOptions{}, Config{})
+	err := AddWorktreeWithNewBranch(t.Context(), wtPath, "new-branch", "", Config{})
 	if err != nil {
 		t.Fatalf("AddWorktreeWithNewBranch failed: %v", err)
 	}
@@ -363,7 +363,7 @@ func TestAddWorktree_NoGitignore(t *testing.T) {
 	defer restore()
 
 	wtPath := filepath.Join(repo.ParentDir(), "worktree-no-gitignore")
-	err := AddWorktree(t.Context(), wtPath, "existing-branch", CopyOptions{}, Config{NoGitignore: true})
+	err := AddWorktree(t.Context(), wtPath, "existing-branch", Config{NoGitignore: true})
 	if err != nil {
 		t.Fatalf("AddWorktree failed: %v", err)
 	}
@@ -387,7 +387,7 @@ func TestAddWorktree_NoReadme(t *testing.T) {
 	defer restore()
 
 	wtPath := filepath.Join(repo.ParentDir(), "worktree-no-readme")
-	err := AddWorktree(t.Context(), wtPath, "existing-branch", CopyOptions{}, Config{NoReadme: true})
+	err := AddWorktree(t.Context(), wtPath, "existing-branch", Config{NoReadme: true})
 	if err != nil {
 		t.Fatalf("AddWorktree failed: %v", err)
 	}
@@ -418,7 +418,7 @@ func TestAddWorktree_FromBareRepository(t *testing.T) {
 	}()
 
 	wtPath := filepath.Join(bareRepo.ParentDir(), "wt-existing")
-	err = AddWorktree(t.Context(), wtPath, "main", CopyOptions{}, Config{})
+	err = AddWorktree(t.Context(), wtPath, "main", Config{})
 	if err != nil {
 		t.Fatalf("AddWorktree from bare repo failed: %v", err)
 	}
@@ -462,7 +462,7 @@ func TestAddWorktreeWithNewBranch_FromBareRepository(t *testing.T) {
 	}()
 
 	wtPath := filepath.Join(bareRepo.ParentDir(), "wt-new-branch")
-	err = AddWorktreeWithNewBranch(t.Context(), wtPath, "new-feature", "", CopyOptions{}, Config{})
+	err = AddWorktreeWithNewBranch(t.Context(), wtPath, "new-feature", "", Config{})
 	if err != nil {
 		t.Fatalf("AddWorktreeWithNewBranch from bare repo failed: %v", err)
 	}
