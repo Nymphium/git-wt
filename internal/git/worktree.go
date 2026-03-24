@@ -281,7 +281,7 @@ type addWorktreeContext struct {
 
 // prepareAdd detects the repository type (bare vs normal), determines the
 // copy source worktree root, and initializes the destination parent directory.
-func prepareAdd(ctx context.Context, path string) (*addWorktreeContext, error) {
+func prepareAdd(ctx context.Context, path string, cfg Config) (*addWorktreeContext, error) {
 	isBareRoot, err := IsBareRoot(ctx)
 	if err != nil {
 		return nil, err
@@ -299,7 +299,7 @@ func prepareAdd(ctx context.Context, path string) (*addWorktreeContext, error) {
 	if err := os.MkdirAll(parentDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create parent directory: %w", err)
 	}
-	if err := initBaseDir(parentDir); err != nil {
+	if err := initBaseDir(parentDir, cfg); err != nil {
 		return nil, err
 	}
 
@@ -333,8 +333,8 @@ func copyAfterAdd(ctx context.Context, ac *addWorktreeContext, dstPath string, c
 }
 
 // AddWorktree creates a new worktree for the given branch.
-func AddWorktree(ctx context.Context, path, branch string, copyOpts CopyOptions) error {
-	ac, err := prepareAdd(ctx, path)
+func AddWorktree(ctx context.Context, path, branch string, copyOpts CopyOptions, cfg Config) error {
+	ac, err := prepareAdd(ctx, path, cfg)
 	if err != nil {
 		return err
 	}
@@ -354,8 +354,8 @@ func AddWorktree(ctx context.Context, path, branch string, copyOpts CopyOptions)
 
 // AddWorktreeWithNewBranch creates a new worktree with a new branch.
 // If startPoint is specified, the new branch will be created from that commit/branch.
-func AddWorktreeWithNewBranch(ctx context.Context, path, branch, startPoint string, copyOpts CopyOptions) error {
-	ac, err := prepareAdd(ctx, path)
+func AddWorktreeWithNewBranch(ctx context.Context, path, branch, startPoint string, copyOpts CopyOptions, cfg Config) error {
+	ac, err := prepareAdd(ctx, path, cfg)
 	if err != nil {
 		return err
 	}
@@ -380,12 +380,18 @@ func AddWorktreeWithNewBranch(ctx context.Context, path, branch, startPoint stri
 
 // initBaseDir initializes the basedir with .gitignore and README.md files.
 // It creates these files only if they don't already exist.
-func initBaseDir(baseDir string) error {
-	gitignorePath := filepath.Join(baseDir, ".gitignore")
-	if _, err := os.Stat(gitignorePath); os.IsNotExist(err) {
-		if err := os.WriteFile(gitignorePath, []byte("*\n"), 0600); err != nil {
-			return fmt.Errorf("failed to create .gitignore: %w", err)
+func initBaseDir(baseDir string, cfg Config) error {
+	if !cfg.NoGitignore {
+		gitignorePath := filepath.Join(baseDir, ".gitignore")
+		if _, err := os.Stat(gitignorePath); os.IsNotExist(err) {
+			if err := os.WriteFile(gitignorePath, []byte("*\n"), 0600); err != nil {
+				return fmt.Errorf("failed to create .gitignore: %w", err)
+			}
 		}
+	}
+
+	if cfg.NoReadme {
+		return nil
 	}
 
 	readmePath := filepath.Join(baseDir, "README.md")
